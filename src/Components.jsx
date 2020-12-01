@@ -12,6 +12,8 @@ export default class PlayerManager extends React.Component {
   constructor(props) {
     super(props);
 
+    // players are given IDs which are just their index
+    // in this.props.players
     let available_ids = this.props.players.map((_, index) => {
       return index;
     });
@@ -23,6 +25,7 @@ export default class PlayerManager extends React.Component {
     }
   }
 
+  // reset callback to empty lineup
   reset = () => {
     let available_ids = this.props.players.map((_, index) => {
       return index;
@@ -35,6 +38,7 @@ export default class PlayerManager extends React.Component {
     })
   }
 
+  // callback to add a specific player to the lineup
   addToLineup = (id) => {
     for (var i = 0; i < this.state.lineup_ids.length; i++) {
       if (this.state.lineup_ids[i] === null) {
@@ -53,6 +57,7 @@ export default class PlayerManager extends React.Component {
     }
   }
 
+  // callback to remove a player from the lineup
   removeFromLineup = (id) => {
     for (var i = 0; i < this.state.lineup_ids.length; i++) {
       if (this.state.lineup_ids[i] === id) {
@@ -71,6 +76,7 @@ export default class PlayerManager extends React.Component {
     }
   }
 
+  // callback to swap lineup slots [slot] and [slot - 1]
   swapLineup = (slot) => {
     if (slot < 1 || slot > 9) {
       return;
@@ -82,6 +88,8 @@ export default class PlayerManager extends React.Component {
     this.setState({lineup_ids: lineup_ids})
   }
 
+  // callback to determine whether the lineup is full.
+  // used to disable "add to lineup" buttons
   lineupIsFull = () => {
     for (let id of this.state.lineup_ids) {
       if (id === null) {
@@ -114,6 +122,7 @@ class AvailablePlayers extends React.Component {
   constructor(props) {
       super(props);
 
+      // set up filters and sorts as a function lookup table
       this.handedness_filters = {
         "ALL": (_) => {return true;},
         "L": (id) => {return this.props.allPlayers[id].bats === "L";},
@@ -138,6 +147,7 @@ class AvailablePlayers extends React.Component {
           return this.props.allPlayers[id2].home_runs - this.props.allPlayers[id1].home_runs;},
       }
 
+      // initial settings
       this.state = {
         handedness_filter_setting: "ALL",
         position_filter_setting: "ALL",
@@ -161,6 +171,7 @@ class AvailablePlayers extends React.Component {
     this.props.remove(id);
   }
 
+  // perform filters/sorts and then map each player to their own component
   createList() {
     return this.props.availableIDs
     .filter(this.handedness_filters[this.state.handedness_filter_setting])
@@ -205,6 +216,7 @@ class AvailablePlayers extends React.Component {
 
 class AvailablePlayerCard extends React.Component {
   remove = () => {
+    // this.props.remove is the PlayerManager remove function
     this.props.remove(this.props.id);
   }
 
@@ -247,6 +259,7 @@ class Lineup extends React.Component {
     this.props.swap(slot);
   }
 
+  // aggregates home runs
   sumHomeRuns = () => {
     let total = 0;
     for (let id of this.props.lineupIDs) {
@@ -259,13 +272,16 @@ class Lineup extends React.Component {
     return total;
   }
 
+  // maps lineup list to components
   createList() {
     return this.props.lineupIDs.map(((id, index) => {
       if (id === null) {
+        // empty slot
         return (<div key={index}><div className="my-2 border lineupSlot">{index + 1}. Empty slot</div><br></br></div>);
       } else {
+        // LineupPlayerCard
         let player = this.props.allPlayers[id];
-        return (<PlayerLineupEntry key={index} info={player} id={id} slot={index + 1} swap={this.swap} remove={this.remove}></PlayerLineupEntry>)
+        return (<LineupPlayerCard key={index} info={player} id={id} slot={index + 1} swap={this.swap} remove={this.remove}></LineupPlayerCard>)
       }
     }))
   }
@@ -280,7 +296,7 @@ class Lineup extends React.Component {
   }
 }
 
-class PlayerLineupEntry extends React.Component {
+class LineupPlayerCard extends React.Component {
   remove = () => {
     this.props.remove(this.props.id);
   }
